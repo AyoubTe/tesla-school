@@ -1,0 +1,212 @@
+<div class="page-head">
+  <div>
+    <h1>{{ today | date: 'EEEE d MMMM' }}</h1>
+    <p>
+      @switch (auth.role()) {
+        @case ('ADMIN') { An overview of the whole school. }
+        @case ('TEACHER') { Your lessons today and the classes you teach. }
+        @default { Your day, your grades and your attendance. }
+      }
+    </p>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="alert" role="alert">
+    <app-icon name="alert" [size]="17" /> {{ error() }}
+    <button type="button" class="btn sm" (click)="load()">Try again</button>
+  </div>
+}
+
+@if (!data() && !error()) {
+  <div class="grid cols-3">
+    <div class="panel panel-pad"><div class="skeleton" style="height:120px"></div></div>
+    <div class="panel panel-pad"><div class="skeleton" style="height:120px"></div></div>
+    <div class="panel panel-pad"><div class="skeleton" style="height:120px"></div></div>
+  </div>
+}
+
+<!-- ================================================================ ADMIN -->
+@if (data()?.admin; as a) {
+  <div class="instrument panel">
+    <a routerLink="/students" class="cell">
+      <span class="label">Students</span><strong class="display">{{ a.students }}</strong>
+    </a>
+    <a routerLink="/teachers" class="cell">
+      <span class="label">Teachers</span><strong class="display">{{ a.teachers }}</strong>
+    </a>
+    <a routerLink="/classes" class="cell">
+      <span class="label">Classes</span><strong class="display">{{ a.classes }}</strong>
+    </a>
+    <a routerLink="/courses" class="cell">
+      <span class="label">Courses</span><strong class="display">{{ a.courses }}</strong>
+    </a>
+    <div class="dials">
+      <app-dial [value]="a.attendanceRate30d" label="Attendance, last 30 days" />
+      <app-dial [value]="a.averageGrade" label="Average grade" />
+    </div>
+  </div>
+
+  <div class="grid cols-2 mt">
+    <section class="panel">
+      <div class="panel-head"><h2 class="section-title">Classes</h2><a routerLink="/classes" class="small">Manage classes</a></div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Class</th><th>Enrolment</th><th class="right">Average</th></tr></thead>
+          <tbody>
+            @for (c of a.classStats; track c.classId) {
+              <tr class="clickable" [routerLink]="['/classes', c.classId]">
+                <td><strong>{{ c.name }}</strong></td>
+                <td>
+                  <div class="enrol">
+                    <div class="meter"><span [style.width.%]="c.students / c.capacity * 100"></span></div>
+                    <span class="muted small num">{{ c.students }}/{{ c.capacity }}</span>
+                  </div>
+                </td>
+                <td class="right num">{{ c.average === null ? '–' : (c.average | number: '1.0-1') + '%' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2 class="section-title">How grades are spread</h2><span class="muted small">All assessments</span></div>
+      <div class="panel-body">
+        <div class="histogram" role="img" aria-label="Number of grades per 10 percent band">
+          @for (n of a.gradeDistribution; track $index) {
+            <div class="bar-col" [title]="bucketLabel($index) + ': ' + n + ' grades'">
+              <span class="bar-n">{{ n || '' }}</span>
+              <div class="bar" [class.high]="$index >= 7" [class.low]="$index < 5"
+                   [style.height.%]="n / maxBucket() * 100"></div>
+              <span class="bar-x">{{ $index * 10 }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  </div>
+}
+
+<!-- ============================================================== TEACHER -->
+@if (data()?.teacher; as t) {
+  <div class="grid split">
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="section-title">Today's lessons</h2>
+        <a routerLink="/timetable" class="small">Full timetable</a>
+      </div>
+      @for (s of t.today; track s.id) {
+        <div class="lesson" [class.now]="isNow(s)" [class.past]="isPast(s)">
+          <div class="time num"><strong>{{ hhmm(s.startTime) }}</strong><span>{{ hhmm(s.endTime) }}</span></div>
+          <span class="stripe" [style.background]="s.color"></span>
+          <div class="what">
+            <strong>{{ s.courseName }}</strong>
+            <span class="muted small">{{ s.className }}{{ s.room ? ', ' + s.room : '' }}</span>
+          </div>
+          @if (isNow(s)) { <span class="tag arc">Now</span> }
+          @if (pending(s.courseId)) {
+            <a class="btn sm" [routerLink]="['/attendance']" [queryParams]="{ courseId: s.courseId, date: todayIso }">
+              <app-icon name="clipboard" [size]="15" /> Take attendance
+            </a>
+          } @else {
+            <span class="tag ok"><app-icon name="check" [size]="13" /> Attendance taken</span>
+          }
+        </div>
+      } @empty {
+        <div class="empty"><app-icon name="calendar" [size]="30" /><h3>No lessons today</h3><p>Enjoy the free day, or plan ahead in your timetable.</p></div>
+      }
+    </section>
+
+    <div class="stack">
+      <div class="instrument panel slim">
+        <div class="cell"><span class="label">Courses</span><strong class="display">{{ t.courses.length }}</strong></div>
+        <div class="cell"><span class="label">Students</span><strong class="display">{{ t.students }}</strong></div>
+        <div class="cell"><span class="label">Grades this week</span><strong class="display">{{ t.gradesThisWeek }}</strong></div>
+      </div>
+      <section class="panel">
+        <div class="panel-head"><h2 class="section-title">My courses</h2></div>
+        @for (c of t.courses; track c.id) {
+          <a class="list-row course-row" [routerLink]="['/grades']" [queryParams]="{ courseId: c.id }">
+            <span class="dot" [style.background]="c.color"></span>
+            <span class="grow"><strong>{{ c.name }}</strong>&nbsp; <span class="muted small">{{ c.className }}</span></span>
+            <span class="muted small">Gradebook</span>
+            <app-icon name="chevron-right" [size]="16" />
+          </a>
+        }
+      </section>
+    </div>
+  </div>
+}
+
+<!-- ============================================================== STUDENT -->
+@if (data()?.student; as s) {
+  <div class="grid split">
+    <div class="stack">
+      <div class="instrument panel">
+        <div class="dials wide">
+          <app-dial [value]="s.grades.overall" label="Overall average" />
+          <app-dial [value]="s.attendance.rate" label="Attendance" />
+        </div>
+        <div class="facts">
+          <span><strong>{{ s.attendance.absent }}</strong> absences</span>
+          <span><strong>{{ s.attendance.late }}</strong> late arrivals</span>
+          <span><strong>{{ gradedCourses() }}</strong> of {{ s.grades.courses.length }} courses graded</span>
+        </div>
+      </div>
+
+      <section class="panel">
+        <div class="panel-head"><h2 class="section-title">By course</h2><a routerLink="/grades" class="small">All grades</a></div>
+        <div class="panel-body stack">
+          @for (c of s.grades.courses; track c.courseId) {
+            <div class="course-avg">
+              <span class="name"><span class="dot" [style.background]="c.color"></span>{{ c.courseName }}</span>
+              <div class="meter"><span [style.width.%]="c.average ?? 0" [style.background]="c.color"></span></div>
+              <span class="num val">{{ c.average === null ? '–' : (c.average | number: '1.0-0') + '%' }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <div class="stack">
+      <section class="panel">
+        <div class="panel-head"><h2 class="section-title">Today</h2><a routerLink="/timetable" class="small">Timetable</a></div>
+        @for (l of s.today; track l.id) {
+          <div class="lesson" [class.now]="isNow(l)" [class.past]="isPast(l)">
+            <div class="time num"><strong>{{ hhmm(l.startTime) }}</strong><span>{{ hhmm(l.endTime) }}</span></div>
+            <span class="stripe" [style.background]="l.color"></span>
+            <div class="what">
+              <strong>{{ l.courseName }}</strong>
+              <span class="muted small">{{ l.teacherName }}{{ l.room ? ', ' + l.room : '' }}</span>
+            </div>
+            @if (isNow(l)) { <span class="tag arc">Now</span> }
+          </div>
+        } @empty {
+          <div class="empty"><app-icon name="calendar" [size]="30" /><h3>No lessons today</h3></div>
+        }
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2 class="section-title">Latest grades</h2></div>
+        @for (g of s.recentGrades; track g.id) {
+          <div class="list-row">
+            <span class="dot" [style.background]="g.color"></span>
+            <span class="grow"><strong>{{ g.title }}</strong><br><span class="muted small">{{ g.courseName }}, {{ g.date | date: 'MMM d' }}</span></span>
+            <span class="score num">{{ g.score }}<small>/{{ g.maxScore }}</small></span>
+          </div>
+        } @empty {
+          <div class="empty"><h3>No grades yet</h3></div>
+        }
+      </section>
+    </div>
+  </div>
+}
+
+@if (data()) {
+  <section class="panel mt">
+    <div class="panel-head"><h2 class="section-title">Announcements</h2><a routerLink="/announcements" class="small">See all</a></div>
+    <app-announcement-list [items]="announcements()" [compact]="true" />
+  </section>
+}

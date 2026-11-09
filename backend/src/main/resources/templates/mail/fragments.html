@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Header: Prussian band with the school wordmark -->
+<table th:fragment="header" role="presentation" width="100%" cellpadding="0" cellspacing="0"
+       style="background:#10263F;border-radius:14px 14px 0 0;">
+    <tr>
+        <td style="padding:26px 32px;">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#F2A93B;vertical-align:middle;margin-right:10px;"></span>
+            <span style="font-family:Arial,Helvetica,sans-serif;font-size:18px;font-weight:800;letter-spacing:.02em;color:#ffffff;vertical-align:middle;"
+                  th:text="${appName}">Tesla School</span>
+        </td>
+    </tr>
+</table>
+
+<!-- Primary action button -->
+<table th:fragment="button(label, url)" role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 8px;">
+    <tr>
+        <td style="background:#137A9A;border-radius:10px;">
+            <a th:href="${url}" th:text="${label}"
+               style="display:inline-block;padding:13px 24px;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;">Open</a>
+        </td>
+    </tr>
+</table>
+
+<!-- Footer -->
+<table th:fragment="footer" role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+        <td style="padding:20px 32px 28px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#6B7A8C;">
+            You're receiving this because you have an account at <span th:text="${appName}">Tesla School</span>.<br>
+            &copy; <span th:text="${year}">2026</span> <span th:text="${appName}">Tesla School</span>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+import { Routes } from '@angular/router';
+import { authGuard, guestGuard, roleGuard } from './core/http';
+
+export const routes: Routes = [
+  {
+    path: 'login',
+    canActivate: [guestGuard],
+    title: 'Sign in · Tesla School',
+    loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent),
+  },
+  {
+    path: 'forgot-password',
+    canActivate: [guestGuard],
+    title: 'Forgot password · Tesla School',
+    loadComponent: () => import('./features/auth/forgot-password.component').then(m => m.ForgotPasswordComponent),
+  },
+  {
+    path: 'reset-password',
+    title: 'Reset password · Tesla School',
+    loadComponent: () => import('./features/auth/reset-password.component').then(m => m.ResetPasswordComponent),
+  },
+  {
+    path: '',
+    canActivate: [authGuard],
+    loadComponent: () => import('./layout/shell.component').then(m => m.ShellComponent),
+    children: [
+      { path: '', title: 'Dashboard · Tesla School',
+        loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'students', title: 'Students · Tesla School', canActivate: [roleGuard('ADMIN', 'TEACHER')],
+        loadComponent: () => import('./features/students/students.component').then(m => m.StudentsComponent) },
+      { path: 'students/:id', title: 'Student · Tesla School', canActivate: [roleGuard('ADMIN', 'TEACHER')],
+        loadComponent: () => import('./features/students/student-detail.component').then(m => m.StudentDetailComponent) },
+      { path: 'teachers', title: 'Teachers · Tesla School',
+        loadComponent: () => import('./features/teachers/teachers.component').then(m => m.TeachersComponent) },
+      { path: 'classes', title: 'Classes · Tesla School',
+        loadComponent: () => import('./features/classes/classes.component').then(m => m.ClassesComponent) },
+      { path: 'classes/:id', title: 'Class · Tesla School', canActivate: [roleGuard('ADMIN', 'TEACHER')],
+        loadComponent: () => import('./features/classes/class-detail.component').then(m => m.ClassDetailComponent) },
+      { path: 'courses', title: 'Courses · Tesla School',
+        loadComponent: () => import('./features/courses/courses.component').then(m => m.CoursesComponent) },
+      { path: 'timetable', title: 'Timetable · Tesla School',
+        loadComponent: () => import('./features/timetable/timetable.component').then(m => m.TimetableComponent) },
+      { path: 'grades', title: 'Grades · Tesla School',
+        loadComponent: () => import('./features/grades/grades.component').then(m => m.GradesComponent) },
+      { path: 'attendance', title: 'Attendance · Tesla School',
+        loadComponent: () => import('./features/attendance/attendance.component').then(m => m.AttendanceComponent) },
+      { path: 'announcements', title: 'Announcements · Tesla School',
+        loadComponent: () => import('./features/announcements/announcements.component').then(m => m.AnnouncementsComponent) },
+      { path: 'notifications', title: 'Notifications · Tesla School',
+        loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent) },
+      { path: 'accounts', title: 'Accounts · Tesla School', canActivate: [roleGuard('ADMIN')],
+        loadComponent: () => import('./features/accounts/accounts.component').then(m => m.AccountsComponent) },
+      { path: 'profile', title: 'Profile · Tesla School',
+        loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent) },
+    ],
+  },
+  { path: '**', redirectTo: '' },
+];

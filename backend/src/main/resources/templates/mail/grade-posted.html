@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><title th:text="${appName}">Tesla School</title></head>
+<body style="margin:0;padding:0;background:#EDF0F4;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#EDF0F4;padding:32px 12px;">
+<tr><td align="center">
+<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:14px;">
+<tr><td><table th:replace="~{mail/fragments :: header}"></table></td></tr>
+<tr><td style="padding:32px 32px 8px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#1B2B3D;">
+<h1 style="margin:0 0 16px;font-size:22px;line-height:30px;color:#10263F;">New grade in <span th:text="${course}">Physics</span></h1>
+<p style="margin:0 0 14px;">Hi <span th:text="${name}">Ada</span>, a new grade has been posted.</p>
+<div style="background:#F3F6F9;border-left:3px solid #137A9A;border-radius:6px;padding:14px 16px;margin:18px 0;">
+  <div style="font-size:13px;color:#6B7A8C;" th:text="${title}">Midterm</div>
+  <div style="font-size:26px;font-weight:800;color:#10263F;margin-top:4px;"><span th:text="${score}">16 / 20</span>
+  <span style="font-size:14px;font-weight:600;color:#137A9A;" th:text="${percent}">80%</span></div>
+</div>
+<table th:replace="~{mail/fragments :: button('View my grades', ${actionUrl})}"></table>
+</td></tr>
+<tr><td><table th:replace="~{mail/fragments :: footer}"></table></td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>

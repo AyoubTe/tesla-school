@@ -1,0 +1,72 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: tesla-school
+  datasource:
+    url: jdbc:h2:file:./data/tesla-school;MODE=PostgreSQL;AUTO_SERVER=TRUE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+        default_batch_fetch_size: 50
+  cache:
+    type: caffeine
+    cache-names: classes,courses,teachers,dashboard,schedule
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=10m,recordStats
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_AUTH:false}
+      mail.smtp.starttls.enable: ${MAIL_STARTTLS:false}
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+  thymeleaf:
+    check-template-location: false
+  task:
+    execution:
+      pool:
+        core-size: 4
+        max-size: 8
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,caches,metrics
+
+app:
+  name: Tesla School
+  frontend-url: ${FRONTEND_URL:http://localhost:4200}
+  cors-origins: ${CORS_ORIGINS:http://localhost:4200}
+  mail-from: ${MAIL_FROM:Tesla School <no-reply@tesla-school.edu>}
+  jwt:
+    # 256-bit minimum for HS256. Override JWT_SECRET in every real deployment.
+    secret: ${JWT_SECRET:change-me-tesla-school-dev-secret-key-at-least-32-bytes-long}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:720}
+  seed:
+    enabled: ${SEED_DATA:true}
+
+logging:
+  level:
+    edu.tesla.school: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tesla_school}
+    username: ${DB_USER:tesla}
+    password: ${DB_PASSWORD:tesla}

@@ -1,0 +1,51 @@
+.mt { margin-top: 18px; }
+.grow { flex: 1; min-width: 0; }
+.student-top { grid-template-columns: minmax(220px, 1fr) minmax(0, 2.2fr); align-items: stretch; }
+@media (max-width: 860px) { .student-top { grid-template-columns: 1fr; } }
+
+.course-bars { display: flex; flex-direction: column; gap: 4px; }
+.course-bar {
+  display: grid; grid-template-columns: minmax(150px, 1.3fr) 2fr 56px; gap: 14px; align-items: center;
+  padding: 8px 10px; border: 0; border-radius: 10px; background: none; text-align: left; cursor: pointer; font-size: .9rem;
+  &:hover { background: var(--surface-2); }
+  &.on { background: var(--arc-soft); }
+  .name { display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; }
+  .meter { display: block; }
+  .val { text-align: right; font-weight: 700; }
+}
+
+.pct, .score {
+  display: inline-block; min-width: 46px; padding: 3px 8px; border-radius: 6px; text-align: center;
+  font-weight: 700; font-variant-numeric: tabular-nums; background: var(--surface-3);
+  &.good { background: var(--ok-soft); color: var(--ok); }
+  &.mid { background: var(--arc-soft); color: var(--arc); }
+  &.low { background: var(--spark-soft); color: var(--warn); }
+}
+.score { border: 0; cursor: pointer; font-size: .9rem; }
+.score:hover { outline: 2px solid currentColor; outline-offset: 1px; }
+
+.course-tabs {
+  display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px;
+  button {
+    display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; flex: none;
+    border: 1px solid var(--line); border-radius: 10px; background: var(--surface); cursor: pointer; font-weight: 600; font-size: .88rem;
+    &:hover { border-color: var(--line-strong); }
+    &.on { border-color: var(--arc); box-shadow: inset 0 0 0 1px var(--arc); }
+    .muted { font-weight: 400; }
+  }
+}
+
+.book {
+  th.assess { min-width: 120px; text-align: center; vertical-align: bottom; white-space: normal;
+    span { display: block; color: var(--text); } small { font-weight: 400; font-size: .72rem; } }
+  .score-cell { text-align: center; }
+  .sticky { position: sticky; left: 0; background: var(--surface); z-index: 1; min-width: 200px; }
+  thead .sticky { background: var(--surface-2); }
+  tfoot td { border-top: 1px solid var(--line); background: var(--surface-2); font-size: .85rem; }
+}
+
+.entry-title { margin: 22px 0 10px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.entries { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.entry { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: .9rem;
+  &:last-child { border-bottom: none; } }
+.score-input { width: 90px; height: 36px; text-align: right; }
